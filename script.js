@@ -1,4 +1,6 @@
-API_KEY='AIzaSyCb0IEd0FgbRokB-H_ybXI_Wo2zX77tygU';
+
+
+const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
@@ -6,18 +8,29 @@ const sendButton = document.getElementById('send-button');
 
 // CALL VERCEL BACKEND INSTEAD OF GOOGLE API DIRECTLY
 async function generateResponse(prompt) {
-    const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
+    const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+            contents: [
+                {
+                    parts: [
+                        {
+                            text: prompt
+                        }
+                    ]
+                }
+            ]
+        })
     });
 
     const data = await response.json();
 
-    return (
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "No response received."
-    );
+    return data.candidates[0].content.parts[0].text;
 }
 
 function cleanMarkdown(text) {
@@ -35,7 +48,9 @@ function addMessage(message, isUser) {
 
     const profileImage = document.createElement('img');
     profileImage.classList.add('profile-image');
+
     profileImage.src = isUser ? 'user.png' : 'ro.avif';
+
     profileImage.alt = isUser ? 'User' : 'Bot';
 
     const messageContent = document.createElement('div');
@@ -44,6 +59,7 @@ function addMessage(message, isUser) {
 
     messageElement.appendChild(profileImage);
     messageElement.appendChild(messageContent);
+
     chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
